@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Uplift Connect</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Uplift Connect</h1>
+    <p id="welcome-msg">Empowering communities with access to welfare schemes and skill development programs.</p>
+    <select id="lang-select" style="margin-top:1rem;">
+      <option value="en">English</option>
+      <option value="hi">हिन्दी</option>
+    </select>
+    <div id="auth-section" style="margin-top:1rem;">
+      <button id="register-btn" class="btn">Register</button>
+      <button id="logout-btn" class="btn" style="display:none;">Logout</button>
+      <span id="user-greet" style="margin-left:1rem;"></span>
+    </div>
+  </header>
+
+  <main class="landing">
+    <form id="registration-form" autocomplete="off">
+      <h2>Register New User</h2>
+      <input type="text" id="reg-name" placeholder="Your Name" required>
+      <input type="number" id="reg-age" placeholder="Your Age" min="1" max="120" required>
+      <select id="reg-region" required>
+        <option value="">Select Your Region</option>
+        <option value="North">North</option>
+        <option value="South">South</option>
+        <option value="East">East</option>
+        <option value="West">West</option>
+        <option value="Central">Central</option>
+      </select>
+      <div style="display: flex; justify-content: space-between;">
+        <button type="submit" class="btn">Submit</button>
+        <button type="button" id="cancel-registration" class="btn">Cancel</button>
+      </div>
+    </form>
+
+    <section id="sdg-info">
+      <h2>Sustainable Development Goal 1: No Poverty</h2>
+      <p>Sustainable Development Goal 1 (SDG 1): No Poverty, initiated by the United Nations in 2015, strives to eliminate poverty in all its forms worldwide by 2030. This initiative focuses on eradicating extreme poverty, currently defined as living on less than $2.15 per day, and aims to reduce the percentage of people living in poverty, as determined by national criteria, by at least 50%.</p> 
+      <p>SDG 1 emphasizes the need for equitable access to economic resources, essential services, property, and innovative technologies, especially for the most vulnerable populations. It also promotes the creation of robust social protection systems and the strengthening of resilience against climate-related, economic, and social challenges.</p>
+      <p>Despite significant progress, over 800 million people globally still struggle to meet their basic needs, highlighting the ongoing challenge and the urgent need for collaborative global action to ensure no one is overlooked.</p>
+      <p>In alignment with the commitment of SDG 1 to eradicate poverty in all its forms globally, targeted programs such as the Poverty Alleviation Scheme and the Skill Development Program are essential in promoting this objective.</p>
+      <p>The Poverty Alleviation Scheme links individuals and communities with NGOs and support networks, facilitating access to vital resources, social protection, and economic empowerment opportunities, consistent with SDG 1’s emphasis on inclusive development and social protection systems.</p>
+      <p>Meanwhile, the Skill Development Program empowers individuals, particularly those from disadvantaged backgrounds, to acquire relevant skills, thereby improving employability and encouraging entrepreneurship. Collectively, these initiatives not only offer immediate poverty relief but also foster long-term resilience and self-sufficiency, paving the way for sustainable economic growth and social advancement.</p>
+    </section>
+
+    <section>
+      <h2>Browse Schemes by Category</h2>
+      <div class="buttons">
+        <a href="scheme.html" class="btn">Poverty Alleviation Scheme</a>
+        <a href="skill.html" class="btn">Skill Development Program</a>
+      </div>
+    </section>
+    
+    <section>
+      <h2>Bookmarked Schemes</h2>
+      <ul id="bookmarks-list"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Uplift Connect. Empowering Lives.</p>
+  </footer>
+  <script>
+    // Language switch
+    const translations = {
+      en: "Empowering communities with access to welfare schemes and skill development programs.",
+      hi: "कल्याणकारी योजनाओं और कौशल विकास कार्यक्रमों तक पहुंच के साथ समुदायों को सशक्त बनाना।"
+    };
+    document.getElementById('lang-select').addEventListener('change', function() {
+      const lang = this.value;
+      document.getElementById('welcome-msg').textContent = translations[lang] || translations['en'];
+    });
+
+    // Registration
+    const registerBtn = document.getElementById('register-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userGreet = document.getElementById('user-greet');
+    const registrationForm = document.getElementById('registration-form');
+    function updateAuthUI() {
+      const userData = localStorage.getItem('uplift_user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        registerBtn.style.display = 'none';
+        logoutBtn.style.display = '';
+        userGreet.textContent = `Hello, ${user.name} (${user.age}, ${user.region})!`;
+      } else {
+        registerBtn.style.display = '';
+        logoutBtn.style.display = 'none';
+        userGreet.textContent = '';
+      }
+    }
+    registerBtn.onclick = function() {
+      registrationForm.style.display = 'block';
+    };
+    document.getElementById('cancel-registration').onclick = function() {
+      registrationForm.style.display = 'none';
+    };
+    registrationForm.onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const age = document.getElementById('reg-age').value.trim();
+      const region = document.getElementById('reg-region').value;
+      if (!name || !age || !region) {
+        alert('Please fill all fields');
+        return;
+      }
+      const userData = { name, age, region };
+      localStorage.setItem('uplift_user', JSON.stringify(userData));
+      registrationForm.style.display = 'none';
+      updateAuthUI();
+    };
+    logoutBtn.onclick = function() {
+      localStorage.removeItem('uplift_user');
+      updateAuthUI();
+    };
+    updateAuthUI();
+
+    // Bookmarks display with delete
+    function showBookmarks() {
+      const bookmarksList = document.getElementById('bookmarks-list');
+      if (!bookmarksList) return;
+      bookmarksList.innerHTML = '';
+      const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+      if (bookmarks.length === 0) {
+        bookmarksList.innerHTML = '<li>No bookmarks yet.</li>';
+        return;
+      }
+      bookmarks.forEach(scheme => {
+        const li = document.createElement('li');
+        const schemeName = document.createElement('span');
+        schemeName.textContent = scheme;
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.className = 'btn';
+        deleteBtn.onclick = function() {
+          const updatedBookmarks = bookmarks.filter(s => s !== scheme);
+          localStorage.setItem('bookmarks', JSON.stringify(updatedBookmarks));
+          showBookmarks();
+        };
+        li.appendChild(schemeName);
+        li.appendChild(deleteBtn);
+        bookmarksList.appendChild(li);
+      });
+    }
+    showBookmarks();
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'bookmarks' || e.key === 'uplift_user') {
+        showBookmarks();
+        updateAuthUI();
+      }
+    });
+  </script>
+</body>
+</html>
